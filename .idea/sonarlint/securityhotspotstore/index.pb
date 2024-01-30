@@ -1,0 +1,23 @@
+
+r
+Bapp/src/main/java/com/raiseralex/profilecardlayout/MainActivity.kt,e/c/ec4649ffac34300e8948f251b82cb01a5e58d6ae
+D
+app/build.gradle.kts,d/2/d2a4383452aad84a18429a5844d31330a012a9e6
+@
+build.gradle.kts,d/b/dbcff70658daf80b53ce624f6adcaa529df5ed8d
+@
+local.properties,0/7/0712df971a99ac4d2fccb8e0fb19f377f3374cca
+C
+settings.gradle.kts,7/4/749edfcc96398253e5b3416184e95c46621da850
+t
+Dapp/src/main/java/com/raiseralex/profilecardlayout/ui/theme/Color.kt,8/a/8a34384628bd943279512f6f225618af9d7138eb
+t
+Dapp/src/main/java/com/raiseralex/profilecardlayout/ui/theme/Theme.kt,7/a/7a42fa7c9fa82d9eb210ab36d7e5bec27b52de54
+t
+Dapp/src/main/java/com/raiseralex/profilecardlayout/ui/theme/Shape.kt,e/5/e5a82d2269e856dc3d7cc5ac6ff0d59c838614a6
+s
+Capp/src/main/java/com/raiseralex/profilecardlayout/ui/theme/Type.kt,4/b/4bdb5f2d55852c0ea82ad637091f92e061781144
+q
+Aapp/src/main/java/com/raiseralex/profilecardlayout/UserProfile.kt,6/d/6d7ef06f0a06d86efbc53ba4bade1f403467ccb1
+P
+ app/src/main/AndroidManifest.xml,8/c/8c55c3ccc257e5907959013f99656e4c8ec3903e
