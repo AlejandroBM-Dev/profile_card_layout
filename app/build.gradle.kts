@@ -57,6 +57,8 @@ dependencies {
     implementation(platform("androidx.compose:compose-bom:2023.08.00"))
 
     implementation("com.google.accompanist:accompanist-coil:0.11.1")
+    implementation("androidx.navigation:navigation-compose:2.7.6")
+
     implementation("androidx.compose.ui:ui:1.5.4")
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.ui:ui-tooling-preview")

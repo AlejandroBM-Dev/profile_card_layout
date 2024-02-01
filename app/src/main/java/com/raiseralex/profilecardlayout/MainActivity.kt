@@ -6,6 +6,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -19,6 +20,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -34,8 +37,16 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
+import androidx.navigation.NavType
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import androidx.wear.compose.material3.ContentAlpha
 import androidx.wear.compose.material3.LocalContentAlpha
 import coil.transform.CircleCropTransformation
@@ -49,7 +60,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             ProfileCardLayoutTheme {
-                MainScreen()
+                UsersApplication()
             }
         }
     }
@@ -57,20 +68,100 @@ class MainActivity : ComponentActivity() {
 
 @Suppress("ktlint:standard:function-naming")
 @Composable
-fun MainScreen(userProfiles: List<UserProfile> = userProfileList) {
+fun UserListScreen(
+    userProfiles: List<UserProfile> = userProfileList,
+    navController: NavHostController?,
+) {
     Scaffold(
-        topBar = { AppBar() },
+        topBar = {
+            AppBar(
+                title = "Users list",
+                icon = Icons.Default.Home,
+            ) {
+                navController?.navigateUp()
+            }
+        },
     ) { padding ->
         Surface(
             modifier =
-            Modifier
-                .padding(padding)
-                .fillMaxSize(),
+                Modifier
+                    .padding(padding)
+                    .fillMaxSize(),
         ) {
             LazyColumn {
                 items(userProfiles) { userProfiles ->
-                    ProfileCard(userProfile = userProfiles)
+                    ProfileCard(userProfile = userProfiles) {
+                        navController?.navigate("user_details/${userProfiles.id}")
+                    }
                 }
+            }
+        }
+    }
+}
+
+@Suppress("ktlint:standard:function-naming")
+@Composable
+fun UserProfileDetailScreen(
+    userId: Int,
+    navController: NavHostController?,
+) {
+    val userProfile = userProfileList.first { userProfile -> userId == userProfile.id }
+    Scaffold(topBar = {
+        AppBar(
+            title = "Users profile details",
+            icon = Icons.AutoMirrored.Filled.ArrowBack,
+        ) {
+            navController?.navigateUp()
+        }
+    }) { padding ->
+        Surface(
+            modifier =
+                Modifier
+                    .padding(padding)
+                    .fillMaxSize(),
+        ) {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Top,
+            ) {
+                ProfilePicture(
+                    userProfile.drawableId,
+                    userProfile.status,
+                    240.dp,
+                )
+                ProfileContent(
+                    userProfile.name,
+                    userProfile.status,
+                    alignment = Alignment.CenterHorizontally,
+                )
+            }
+        }
+    }
+}
+
+@Suppress("ktlint:standard:function-naming")
+@Composable
+fun UsersApplication(userProfile: List<UserProfile> = userProfileList) {
+    val navController = rememberNavController()
+    NavHost(navController = navController, startDestination = "users_list") {
+        composable("users_list") {
+            UserListScreen(userProfile, navController)
+        }
+        composable(
+            route = "user_details/{userId}",
+            arguments =
+                listOf(
+                    navArgument("userId") {
+                        type = NavType.IntType
+                    },
+                ),
+        ) { navBackStackEntry ->
+            navBackStackEntry.arguments?.let {
+                UserProfileDetailScreen(
+                    it.getInt("userId"),
+                    navController,
+                )
             }
         }
     }
@@ -79,7 +170,11 @@ fun MainScreen(userProfiles: List<UserProfile> = userProfileList) {
 @Suppress("ktlint:standard:function-naming")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AppBar() {
+fun AppBar(
+    title: String,
+    icon: ImageVector,
+    iconClickAction: () -> Unit,
+) {
     TopAppBar(
         colors =
             TopAppBarDefaults.topAppBarColors(
@@ -87,28 +182,32 @@ fun AppBar() {
             ),
         navigationIcon = {
             Icon(
-                imageVector = Icons.AutoMirrored.Default.ArrowBack,
+                imageVector = icon,
                 contentDescription = "back",
-                Modifier.padding(horizontal = 12.dp),
+                Modifier.padding(horizontal = 12.dp).clickable { iconClickAction.invoke() },
             )
         },
         title = {
-            Text(text = "Messaging Application users")
+            Text(text = title)
         },
     )
 }
 
 @Suppress("ktlint:standard:function-naming")
 @Composable
-fun ProfileCard(userProfile: UserProfile) {
+fun ProfileCard(
+    userProfile: UserProfile,
+    clickAction: () -> Unit,
+) {
     val cardElevation = CardDefaults.cardElevation(8.dp)
 
     Card(
         modifier =
-        Modifier
-            .padding(top = 16.dp, bottom = 4.dp, start = 16.dp, end = 16.dp)
-            .fillMaxWidth()
-            .wrapContentHeight(align = Alignment.Top),
+            Modifier
+                .padding(top = 16.dp, bottom = 4.dp, start = 16.dp, end = 16.dp)
+                .fillMaxWidth()
+                .wrapContentHeight(align = Alignment.Top)
+                .clickable { clickAction.invoke() },
         elevation = cardElevation,
         colors =
             CardDefaults.cardColors(
@@ -124,10 +223,12 @@ fun ProfileCard(userProfile: UserProfile) {
             ProfilePicture(
                 userProfile.drawableId,
                 userProfile.status,
+                72.dp,
             )
             ProfileContent(
                 userProfile.name,
                 userProfile.status,
+                Alignment.Start,
             )
         }
     }
@@ -138,6 +239,7 @@ fun ProfileCard(userProfile: UserProfile) {
 fun ProfilePicture(
     drawableId: String,
     onlineStatus: Boolean,
+    imageSize: Dp,
 ) {
     Card(
         shape = CircleShape,
@@ -155,13 +257,17 @@ fun ProfilePicture(
         elevation = CardDefaults.cardElevation(4.dp),
     ) {
         // AsyncImage(model = "https://picsum.photos/300/300", contentDescription = "Coil pictures..")
-        Image(painter = rememberCoilPainter(
-            request = drawableId,
-            requestBuilder = {
-                transformations(CircleCropTransformation())
-            }),
-            modifier = Modifier.size(72.dp),
-            contentDescription = "Profile picture description" )
+        Image(
+            painter =
+                rememberCoilPainter(
+                    request = drawableId,
+                    requestBuilder = {
+                        transformations(CircleCropTransformation())
+                    },
+                ),
+            modifier = Modifier.size(imageSize),
+            contentDescription = "Profile picture description",
+        )
     }
 }
 
@@ -170,12 +276,13 @@ fun ProfilePicture(
 fun ProfileContent(
     userName: String,
     onlineStatus: Boolean,
+    alignment: Alignment.Horizontal,
 ) {
     Column(
         modifier =
-        Modifier
-            .padding(8.dp)
-            .fillMaxWidth(),
+            Modifier
+                .padding(8.dp),
+        horizontalAlignment = alignment,
     ) {
         Text(
             text = userName,
@@ -193,10 +300,8 @@ fun ProfileContent(
     uiMode = Configuration.UI_MODE_NIGHT_YES,
 )
 @Composable
-fun GreetingPreview() {
-    ProfileCardLayoutTheme {
-        MainScreen()
-    }
+fun PreviewUser() {
+    UserProfileDetailScreen(0,null)
 }
 
 /*var a: String? = "abc"
